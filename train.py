@@ -122,7 +122,8 @@ def generate_fake_images(model, latents):
     results = []
     for latent in latents:
         images = model([latent])
-        results = results + images
+        for img in images:
+            results.append(img)
     return results
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):

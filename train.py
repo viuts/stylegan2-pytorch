@@ -123,8 +123,9 @@ def generate_fake_images(model, latents):
     for latent in latents:
         images = model([latent])
         for img in images[0]:
+            print(img.shape)
             results.append(img)
-    return torch.Tensor(results)
+    return results
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
     loader = sample_data(loader)

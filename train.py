@@ -298,20 +298,20 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     g_ema.eval()
                     sample = generate_fake_images(g_ema, sample_z_chunks)
                     if wandb and args.wandb:
-                        label = f'{str(i).zfill(6)}.png'
+                        label = f'{str(i).zfill(8)}.png'
                         image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))
                         wandb.log({"samples": [wandb.Image(image, caption=label)]})
                     else:
                         utils.save_image(
                             sample,
-                            f'sample/{str(i).zfill(6)}.png',
+                            f'sample/{str(i).zfill(8)}.png',
                             nrow=8,
                             normalize=True,
                             range=(-1, 1),
                         )
 
             if i % 500 == 0:
-                ckpt_name = 'checkpoint/latest.pt'
+                ckpt_name = f'checkpoint/{str(i).zfill(8)}.pt'
                 torch.save(
                     {
                         'g': g_module.state_dict(),
@@ -409,7 +409,11 @@ if __name__ == '__main__':
     
     # load state dict is resume from training
     if args.resume and wandb and args.wandb:
-        weights_file = wandb.restore('latest.pt')
+        api = wandb.Api()
+        runs = api.runs("viuts/stylegan2", order='created_at')
+        args.current_ckpt = runs[0].summary.current_ckpt
+
+        weights_file = wandb.restore('latest.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
         states = torch.load(weights_file.name)
         # restore all models
         generator.load_state_dict(states['g'])
@@ -417,10 +421,8 @@ if __name__ == '__main__':
         g_ema.load_state_dict(states['g_ema'])
         g_optim.load_state_dict(states['g_optim'])
         d_optim.load_state_dict(states['d_optim'])
-
-        api = wandb.Api()
-        runs = api.runs("viuts/stylegan2", order='created_at')
-        args.current_ckpt = runs[0].summary.current_ckpt
+        # clean up
+        os.unlink(weights_file.name)
 
     transform = transforms.Compose(
         [

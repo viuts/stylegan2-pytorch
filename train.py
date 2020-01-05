@@ -404,14 +404,11 @@ if __name__ == '__main__':
         betas=(0 ** d_reg_ratio, 0.99 ** d_reg_ratio),
     )
 
-    if get_rank() == 0 and wandb is not None and args.wandb:
-        wandb.init(project='stylegan2')
-    
     # load state dict is resume from training
     if args.resume and wandb and args.wandb:
         api = wandb.Api()
         runs = api.runs("viuts/stylegan2", order='created_at')
-        args.current_ckpt = 1000 #runs[0].summary.current_ckpt 
+        args.current_ckpt = 1000 #runs[0].summary.current_ckpt
 
         # print(f'Downloading {current_ckpt} model...')
         weights_file = wandb.restore('latest.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
@@ -425,6 +422,9 @@ if __name__ == '__main__':
         # clean up
         os.unlink(weights_file.name)
 
+    if get_rank() == 0 and wandb is not None and args.wandb:
+        wandb.init(project='stylegan2')
+    
     transform = transforms.Compose(
         [
             transforms.RandomHorizontalFlip(),

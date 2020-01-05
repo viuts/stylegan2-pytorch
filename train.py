@@ -274,7 +274,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         path_length_val = loss_reduced['path_length'].mean().item()
 
         if get_rank() == 0:
-            pbar.set_postfix(d_loss=f'{d_loss_val:.4f}', g_loss=f'{g_loss_val:.4f}', r1_loss=f'{r1_val:.4f}', path=f'{path_loss_val:.4f}', mean='{mean_path_length_avg:.4f}')
+            pbar.set_postfix(d_loss=f'{d_loss_val:.4f}', g_loss=f'{g_loss_val:.4f}', r1_loss=f'{r1_val:.4f}', path=f'{path_loss_val:.4f}', mean=f'{mean_path_length_avg:.4f}')
 
             if wandb and args.wandb:
                 wandb.log(
@@ -308,7 +308,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                             range=(-1, 1),
                         )
 
-            if i % 10000 == 0:
+            if i % 500 == 0:
                 ckpt_name = 'checkpoint/latest.pt'
                 torch.save(
                     {

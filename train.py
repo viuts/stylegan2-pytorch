@@ -118,6 +118,12 @@ def set_grad_none(model, targets):
         if n in targets:
             p.grad = None
 
+def generate_fake_iamges(model, latents):
+    results = []
+    for latent in latents:
+        image = model([latent])
+        results.append(image)
+    return results
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
     loader = sample_data(loader)
@@ -165,7 +171,12 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         if p.grad is None:
             none_d_grads.add(n)
 
+    torch.manual_seed(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)
+    torch.manual_seed(torch.initial_seed())
+    current_ckpt = args.current_ckpt
+
+    pbar.update(current_ckpt)
 
     for i in pbar:
         real_img = next(loader)
@@ -274,17 +285,16 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         'Real Score': real_score_val,
                         'Fake Score': fake_score_val,
                         'Path Length': path_length_val,
+                        'current_ckpt': current_ckpt,
                     }
                 )
 
             if i % 100 == 0:
                 with torch.no_grad():
                     g_ema.eval()
-                    print('Generating Fake images...')
-                    sample, _ = g_ema([sample_z])
+                    sample = generate_fake_iamges(g_ema, sample_z)
                     if wandb and args.wandb:
                         label = f'{str(i).zfill(6)}.png'
-                        print('Generating Fake images grid...')
                         image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))
                         wandb.log({"samples": [wandb.Image(image, caption=label)]})
                     else:
@@ -308,6 +318,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     },
                     ckpt_name,
                 )
+                current_ckpt = i
                 if wandb and args.wandb:
                     wandb.save(ckpt_name)
 
@@ -346,6 +357,7 @@ if __name__ == '__main__':
 
     args.latent = 512
     args.n_mlp = 8
+    args.current_iter = 0
 
     generator = Generator(
         args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier
@@ -389,13 +401,16 @@ if __name__ == '__main__':
     )
 
     if get_rank() == 0 and wandb is not None and args.wandb:
-        wandb.init(project='stylegan 2')
+        wandb.init(project='stylegan2')
     
     # load state dict is resume from training
     if args.resume and wandb and args.wandb:
         weights_file = wandb.restore('latest.pt')
         states = torch.load(weights_file.name)
         print(states)
+        api = wandb.Api()
+        runs = api.runs("viuts/stylegan2", order='created_at')
+        current_iter = runs[0].summary.current_ckpt
 
     transform = transforms.Compose(
         [

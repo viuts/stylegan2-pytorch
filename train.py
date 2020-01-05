@@ -121,11 +121,11 @@ def set_grad_none(model, targets):
 def generate_fake_images(model, latents):
     results = []
     for latent in latents:
+        print(latent.shape)
         images = model([latent])
+        print(images)
         for img in images:
-            print(img.shape)
             results.append(img)
-    print(results[0].shape)
     return torch.Tensor(results)
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):

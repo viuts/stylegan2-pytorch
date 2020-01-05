@@ -410,8 +410,10 @@ if __name__ == '__main__':
         runs = api.runs("viuts/stylegan2", order='created_at')
         args.current_ckpt = 1000 #runs[0].summary.current_ckpt
 
-        # print(f'Downloading {current_ckpt} model...')
+        print(f'Downloading {args.current_ckpt} model...')
         weights_file = wandb.restore('latest.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
+        print("Download finished")
+        print(weights_file.name)
         states = torch.load(weights_file.name)
         # restore all models
         generator.load_state_dict(states['g'])

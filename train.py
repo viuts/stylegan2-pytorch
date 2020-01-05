@@ -411,7 +411,13 @@ if __name__ == '__main__':
     if args.resume and wandb and args.wandb:
         weights_file = wandb.restore('latest.pt')
         states = torch.load(weights_file.name)
-        print(states)
+        # restore all models
+        generator.load_state_dict(states['g'])
+        discriminator.load_state_dict(states['d'])
+        g_ema.load_state_dict(states['g_ema'])
+        g_optim.load_state_dict(states['g_optim'])
+        d_optim.load_state_dict(states['d_optim'])
+
         api = wandb.Api()
         runs = api.runs("viuts/stylegan2", order='created_at')
         args.current_ckpt = runs[0].summary.current_ckpt

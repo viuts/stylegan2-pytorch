@@ -118,11 +118,11 @@ def set_grad_none(model, targets):
         if n in targets:
             p.grad = None
 
-def generate_fake_iamges(model, latents):
+def generate_fake_images(model, latents):
     results = []
     for latent in latents:
-        image = model([latent])
-        results.append(image)
+        images = model([latent])
+        results = results + images
     return results
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
@@ -173,6 +173,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
     torch.manual_seed(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)
+    sample_z_chunks = torch.split(sample_z, args.batch)
     torch.manual_seed(torch.initial_seed())
     current_ckpt = args.current_ckpt
 
@@ -292,7 +293,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
             if i % 100 == 0:
                 with torch.no_grad():
                     g_ema.eval()
-                    sample = generate_fake_iamges(g_ema, sample_z)
+                    sample = generate_fake_images(g_ema, sample_z_chunks)
                     if wandb and args.wandb:
                         label = f'{str(i).zfill(6)}.png'
                         image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))

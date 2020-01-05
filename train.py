@@ -190,14 +190,16 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         if p.grad is None:
             none_d_grads.add(n)
 
+    seed = torch.initial_seed()
     torch.manual_seed(20)
     torch.cuda.manual_seed_all(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)
     sample_z_chunks = torch.split(sample_z, args.batch)
-    random_seed = torch.initial_seed()
-    print('random_seed: ', random_seed)
-    torch.manual_seed(random_seed)
-    torch.cuda.manual_seed_all(random_seed)
+
+    # reset seed
+    print('random_seed: ', seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
     i = current_ckpt + 1
     while i < args.iter:

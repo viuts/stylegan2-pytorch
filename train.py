@@ -261,12 +261,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         path_length_val = loss_reduced['path_length'].mean().item()
 
         if get_rank() == 0:
-            pbar.set_description(
-                (
-                    f'd: {d_loss_val:.4f}; g: {g_loss_val:.4f}; r1: {r1_val:.4f}; '
-                    f'path: {path_loss_val:.4f}; mean path: {mean_path_length_avg:.4f}'
-                )
-            )
+            pbar.set_postfix(d_loss=f'{d_loss_val:.4f}', g_loss=f'{g_loss_val:.4f}', r1_loss=f'{r1_val:.4f}', path=f'{path_loss_val:.4f}', mean='{mean_path_length_avg:.4f}')
 
             if wandb and args.wandb:
                 wandb.log(
@@ -285,9 +280,11 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
             if i % 100 == 0:
                 with torch.no_grad():
                     g_ema.eval()
+                    print('Generating Fake images...')
                     sample, _ = g_ema([sample_z])
                     if wandb and args.wandb:
                         label = f'{str(i).zfill(6)}.png'
+                        print('Generating Fake images grid...')
                         image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))
                         wandb.log({"samples": [wandb.Image(image, caption=label)]})
                     else:
@@ -341,6 +338,7 @@ if __name__ == '__main__':
 
     n_gpu = int(os.environ['WORLD_SIZE']) if 'WORLD_SIZE' in os.environ else 1
     args.distributed = n_gpu > 1
+    torch.cuda.set_device(n_gpu)
 
     if args.distributed:
         torch.cuda.set_device(args.local_rank)

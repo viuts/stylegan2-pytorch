@@ -173,9 +173,11 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
             none_d_grads.add(n)
 
     torch.manual_seed(20)
+    torch.cuda.manual_seed_all(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)
     sample_z_chunks = torch.split(sample_z, args.batch)
-    torch.manual_seed(torch.initial_seed())
+    torch.seed()
+    torch.cuda.seed_all()
     current_ckpt = args.current_ckpt
 
     pbar.update(current_ckpt)

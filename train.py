@@ -123,7 +123,6 @@ def generate_fake_images(model, latents):
     for latent in latents:
         images = model([latent])
         for img in images[0]:
-            print(img.shape)
             results.append(img)
     return results
 

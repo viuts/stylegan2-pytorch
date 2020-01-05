@@ -357,7 +357,7 @@ if __name__ == '__main__':
 
     args.latent = 512
     args.n_mlp = 8
-    args.current_iter = 0
+    args.current_ckpt = 0
 
     generator = Generator(
         args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier
@@ -410,7 +410,7 @@ if __name__ == '__main__':
         print(states)
         api = wandb.Api()
         runs = api.runs("viuts/stylegan2", order='created_at')
-        current_iter = runs[0].summary.current_ckpt
+        args.current_ckpt = runs[0].summary.current_ckpt
 
     transform = transforms.Compose(
         [

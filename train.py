@@ -406,7 +406,7 @@ if __name__ == '__main__':
     if args.resume and wandb and args.wandb:
         api = wandb.Api()
         runs = api.runs("viuts/stylegan2", order='created_at')
-        args.current_ckpt = 1000 #runs[0].summary.current_ckpt
+        args.current_ckpt = int(runs[0].summary.current_ckpt)
 
         print(f'Downloading {args.current_ckpt} model...')
         weights_file = wandb.restore('latest.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)

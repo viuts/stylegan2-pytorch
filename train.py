@@ -128,11 +128,9 @@ def generate_fake_images(model, latents):
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
     loader = sample_data(loader)
+    current_ckpt = args.current_ckpt
 
-    pbar = range(args.current_ckpt, args.iter)
-
-    if get_rank() == 0:
-        pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.01, initial=args.current_ckpt, total=args.iter)
+    pbar = tqdm(dynamic_ncols=True, smoothing=0.01, initial=current_ckpt + 1, total=args.iter)
 
     mean_path_length = 0
 
@@ -143,7 +141,6 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     path_lengths = torch.tensor(0.0, device=device)
     mean_path_length_avg = 0
     loss_dict = {}
-    current_ckpt = args.current_ckpt
 
     if args.distributed:
         g_module = generator.module
@@ -180,7 +177,8 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     torch.seed()
     torch.cuda.seed_all()
 
-    for i in pbar:
+    i = current_ckpt + 1
+    while i < args.iter:
         real_img = next(loader)
         real_img = real_img.to(device)
 
@@ -323,6 +321,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                 current_ckpt = i
                 if wandb and args.wandb:
                     wandb.save(ckpt_name)
+            pbar.update()
 
 
 if __name__ == '__main__':

@@ -129,10 +129,10 @@ def generate_fake_images(model, latents):
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
     loader = sample_data(loader)
 
-    pbar = range(args.iter)
+    pbar = range(args.current_ckpt, args.iter)
 
     if get_rank() == 0:
-        pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.01, initial=args.current_ckpt)
+        pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.01, initial=args.current_ckpt, total=args.iter)
 
     mean_path_length = 0
 

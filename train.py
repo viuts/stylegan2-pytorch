@@ -321,6 +321,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                 current_ckpt = i
                 if wandb and args.wandb:
                     wandb.save(ckpt_name)
+            i = i + 1
             pbar.update()
 
 

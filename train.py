@@ -409,7 +409,7 @@ if __name__ == '__main__':
         args.current_ckpt = int(runs[0].summary.current_ckpt)
 
         print(f'Downloading {args.current_ckpt} model...')
-        weights_file = wandb.restore(f'{args.current_ckpt.zfill(8)}.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
+        weights_file = wandb.restore(f'{str(args.current_ckpt).zfill(8)}.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
         print("Download finished")
         states = torch.load(weights_file.name)
         # restore all models

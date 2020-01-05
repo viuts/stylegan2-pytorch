@@ -357,7 +357,7 @@ if __name__ == '__main__':
     parser.add_argument('--channel_multiplier', type=int, default=2)
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_entity', type=str)
-    parser.add_argument('--wandb_path', type=str, default="stylegan2")
+    parser.add_argument('--wandb_project', type=str, default="stylegan2")
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--resume', action='store_true')
 

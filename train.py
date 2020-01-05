@@ -135,7 +135,7 @@ def locate_latest_pt(path):
         files = run.files()
         for file in files:
             if '.pt' in file.name:
-                return run.path, file.name
+                return '/'.join(run.path), file.name
 
 
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):

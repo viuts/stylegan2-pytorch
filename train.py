@@ -132,7 +132,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     pbar = range(args.iter)
 
     if get_rank() == 0:
-        pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.01)
+        pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.01, initial=args.current_ckpt)
 
     mean_path_length = 0
 
@@ -143,6 +143,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     path_lengths = torch.tensor(0.0, device=device)
     mean_path_length_avg = 0
     loss_dict = {}
+    current_ckpt = args.current_ckpt
 
     if args.distributed:
         g_module = generator.module
@@ -178,9 +179,6 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     sample_z_chunks = torch.split(sample_z, args.batch)
     torch.seed()
     torch.cuda.seed_all()
-    current_ckpt = args.current_ckpt
-
-    pbar.update(current_ckpt)
 
     for i in pbar:
         real_img = next(loader)
@@ -413,7 +411,6 @@ if __name__ == '__main__':
         print(f'Downloading {args.current_ckpt} model...')
         weights_file = wandb.restore('latest.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
         print("Download finished")
-        print(weights_file.name)
         states = torch.load(weights_file.name)
         # restore all models
         generator.load_state_dict(states['g'])

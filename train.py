@@ -126,6 +126,18 @@ def generate_fake_images(model, latents):
             results.append(img)
     return results
 
+def locate_latest_pt(path):
+    api = wandb.Api()
+    runs = api.runs(path, order='created_at')
+
+    # loop for each run to find the lastest model
+    for run in runs:
+        files = run.files()
+        for file in files:
+            if '.pt' in file.name:
+                return run.path, file.name
+
+
 def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device):
     loader = sample_data(loader)
     current_ckpt = args.current_ckpt
@@ -344,6 +356,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.002)
     parser.add_argument('--channel_multiplier', type=int, default=2)
     parser.add_argument('--wandb', action='store_true')
+    parser.add_argument('--wandb_entity', type=str)
+    parser.add_argument('--wandb_path', type=str, default="stylegan2")
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--resume', action='store_true')
 
@@ -404,12 +418,11 @@ if __name__ == '__main__':
 
     # load state dict is resume from training
     if args.resume and wandb and args.wandb:
-        api = wandb.Api()
-        runs = api.runs("viuts/stylegan2", order='created_at')
-        args.current_ckpt = int(runs[0].summary.current_ckpt)
+        wandb_path = '/'.join([args.wandb_entity, args.wandb_project])
+        run_path, file_name = locate_latest_pt(wandb_path)
 
-        print(f'Downloading {args.current_ckpt} model...')
-        weights_file = wandb.restore(f'{str(args.current_ckpt).zfill(8)}.pt', run_path=f'viuts/stylegan2/{runs[0].id}', replace=True)
+        print(f'Downloading {file_name}')
+        weights_file = wandb.restore(file_name, run_path=run_path, replace=True)
         print("Download finished")
         states = torch.load(weights_file.name)
         # restore all models

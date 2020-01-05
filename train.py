@@ -286,15 +286,21 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                 with torch.no_grad():
                     g_ema.eval()
                     sample, _ = g_ema([sample_z])
-                    utils.save_image(
-                        sample,
-                        f'sample/{str(i).zfill(6)}.png',
-                        nrow=8,
-                        normalize=True,
-                        range=(-1, 1),
-                    )
+                    if wandb and args.wandb:
+                        label = f'{str(i).zfill(6)}.png'
+                        image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))
+                        wandb.log({"samples": [wandb.Image(image, caption=label)]})
+                    else:
+                        utils.save_image(
+                            sample,
+                            f'sample/{str(i).zfill(6)}.png',
+                            nrow=8,
+                            normalize=True,
+                            range=(-1, 1),
+                        )
 
             if i % 10000 == 0:
+                ckpt_name = 'checkpoint/latest.pt'
                 torch.save(
                     {
                         'g': g_module.state_dict(),
@@ -303,8 +309,10 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         'g_optim': g_optim.state_dict(),
                         'd_optim': d_optim.state_dict(),
                     },
-                    f'checkpoint/{str(i).zfill(6)}.pt',
+                    ckpt_name,
                 )
+                if wandb and args.wandb:
+                    wandb.save(ckpt_name)
 
 
 if __name__ == '__main__':
@@ -327,6 +335,7 @@ if __name__ == '__main__':
     parser.add_argument('--channel_multiplier', type=int, default=2)
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--resume', action='store_true')
 
     args = parser.parse_args()
 
@@ -382,6 +391,15 @@ if __name__ == '__main__':
         betas=(0 ** d_reg_ratio, 0.99 ** d_reg_ratio),
     )
 
+    if get_rank() == 0 and wandb is not None and args.wandb:
+        wandb.init(project='stylegan 2')
+    
+    # load state dict is resume from training
+    if args.resume and wandb and args.wandb:
+        weights_file = wandb.restore('latest.pt')
+        states = torch.load(weights_file.name)
+        print(states)
+
     transform = transforms.Compose(
         [
             transforms.RandomHorizontalFlip(),
@@ -397,8 +415,5 @@ if __name__ == '__main__':
         sampler=data_sampler(dataset, shuffle=True, distributed=args.distributed),
         drop_last=True,
     )
-
-    if get_rank() == 0 and wandb is not None and args.wandb:
-        wandb.init(project='stylegan 2')
 
     train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device)

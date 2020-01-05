@@ -122,9 +122,7 @@ def generate_fake_images(model, latents):
     results = []
     for latent in latents:
         images = model([latent])
-        print(images[0].shape)
-        print(images[0][0].shape)
-        for img in images:
+        for img in images[0]:
             results.append(img)
     return torch.Tensor(results)
 

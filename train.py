@@ -463,7 +463,7 @@ if __name__ == '__main__':
     loader = data.DataLoader(
         dataset,
         batch_size=args.batch,
-        sampler=data_sampler(dataset, distributed=args.distributed),
+        sampler=data_sampler(dataset, shuffle=False, distributed=args.distributed),
         drop_last=True,
     )
 

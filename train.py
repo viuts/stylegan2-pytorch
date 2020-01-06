@@ -190,7 +190,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         if p.grad is None:
             none_d_grads.add(n)
 
-    seed = torch.initial_seed()
+    seed = torch.initial_seed() % 100000
     torch.manual_seed(20)
     torch.cuda.manual_seed_all(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)

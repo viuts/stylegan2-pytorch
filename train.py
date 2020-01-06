@@ -190,14 +190,13 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         if p.grad is None:
             none_d_grads.add(n)
 
-    seed = torch.initial_seed() % 100000
+    seed = torch.initial_seed() % 10000000
     torch.manual_seed(20)
     torch.cuda.manual_seed_all(20)
     sample_z = torch.randn(8 * 8, args.latent, device=device)
     sample_z_chunks = torch.split(sample_z, args.batch)
 
     # reset seed
-    print('random_seed: ', seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
@@ -310,6 +309,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         'Fake Score': fake_score_val,
                         'Path Length': path_length_val,
                         'current_ckpt': current_ckpt,
+                        'iteration': i,
                     }
                 )
 
@@ -449,7 +449,7 @@ if __name__ == '__main__':
         os.unlink(weights_file.name)
 
     if get_rank() == 0 and wandb is not None and args.wandb:
-        wandb.init(project='stylegan2')
+        wandb.init(project=args.wandb_project)
     
     transform = transforms.Compose(
         [

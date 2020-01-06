@@ -99,7 +99,7 @@ if __name__ == '__main__':
     )
 
     dset = MultiResolutionDataset(args.path, transform=transform, resolution=args.size)
-    loader = DataLoader(dset, batch_size=args.batch, num_workers=4, shuffle=True)
+    loader = DataLoader(dset, batch_size=args.batch, num_workers=4)
 
     features = extract_features(loader, inception, device).numpy()
 

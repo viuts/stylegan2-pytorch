@@ -441,7 +441,6 @@ if __name__ == '__main__':
     if args.resume and wandb and args.wandb:
         wandb_path = '/'.join([args.wandb_entity, args.wandb_project])
         run_path, file_name = locate_latest_pt(wandb_path)
-        file_name = '00009000.pt'
         ckpt_count, _ = file_name.split('.')
         args.current_ckpt = int(ckpt_count)
 

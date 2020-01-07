@@ -325,7 +325,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     sample = generate_fake_images(g_ema, sample_z_chunks)
                     if wandb and args.wandb:
                         label = f'{str(i).zfill(8)}.png'
-                        image = utils.make_grid(sample, nrow=8, normalize=True, range=(-1,1))
+                        image = utils.make_grid(sample, nrow=4, normalize=True, range=(-1,1))
                         wandb.log({"samples": [wandb.Image(image, caption=label)]})
                     else:
                         utils.save_image(

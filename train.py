@@ -198,7 +198,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     seed = torch.initial_seed() % 10000000
     torch.manual_seed(20)
     torch.cuda.manual_seed_all(20)
-    sample_z = torch.randn(8 * 8, args.latent, device=device)
+    sample_z = torch.randn(4 * 4, args.latent, device=device)
     sample_z_chunks = torch.split(sample_z, args.batch)
 
     # reset seed
@@ -337,6 +337,9 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
             if i % 500 == 0:
                 ckpt_name = f'checkpoint/{str(i).zfill(8)}.pt'
+                # remove the previous checkpoint
+                os.rmdir('checkpoint')
+                os.mkdir('checkpoint')
                 torch.save(
                     {
                         'g': g_module.state_dict(),
@@ -437,6 +440,7 @@ if __name__ == '__main__':
     if args.resume and wandb and args.wandb:
         wandb_path = '/'.join([args.wandb_entity, args.wandb_project])
         run_path, file_name = locate_latest_pt(wandb_path)
+        file_name = '00009000.pt'
         ckpt_count, _ = file_name.split('.')
         args.current_ckpt = int(ckpt_count)
 

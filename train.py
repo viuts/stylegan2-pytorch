@@ -153,7 +153,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
     # generate one fake image to check data correct
     test_imgs = next(loader)
-    real_grid = utils.make_grid(test_imgs, nrow=4, normalize=True, range=(-1,1))
+    real_grid = utils.make_grid(test_imgs, nrow=2, normalize=True, range=(-1,1))
     wandb.log({"reals": [wandb.Image(real_grid, caption='Real Data')]})
 
     pbar = tqdm(dynamic_ncols=True, smoothing=0.01, initial=current_ckpt + 1, total=args.iter)

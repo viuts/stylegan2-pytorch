@@ -11,7 +11,7 @@ def generate(args, g_ema, device):
         for i in tqdm(range(args.pics)):
            sample_z = torch.randn(args.sample, args.latent, device=device)
 
-           sample, _ = g_ema([sample_z])
+           sample, _ = g_ema([sample_z], truncation=0.5)
            
            utils.save_image(
             sample,

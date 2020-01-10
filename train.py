@@ -449,8 +449,8 @@ if __name__ == '__main__':
         print("Download finished")
         states = torch.load(weights_file.name)
         # restore all models
-        if 'dlatent_avg' not in states['G']:
-            states['G']['dlatent_avg'] = torch.zeros(args.latent)
+        if 'dlatent_avg' not in states['g']:
+            states['g']['dlatent_avg'] = torch.zeros(args.latent)
         generator.load_state_dict(states['g'])
         discriminator.load_state_dict(states['d'])
         g_ema.load_state_dict(states['g_ema'])

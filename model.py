@@ -8,7 +8,6 @@ from torch import nn
 from torch.nn import functional as F
 from torch.autograd import Function
 
-import ppl
 from op import FusedLeakyReLU, fused_leaky_relu, upfirdn2d
 
 
@@ -465,6 +464,9 @@ class Generator(nn.Module):
 
     def get_latent(self, input):
         return self.style(input)
+    
+    def lerp(a, b, t):
+        return a + (b - a) * t
 
     def forward(
         self,
@@ -530,7 +532,7 @@ class Generator(nn.Module):
         if self.training and self.dlatent_avg_beta != 1:
             with torch.no_grad():
                 batch_dlatent_avg = latent[:, 0].mean(dim=0)
-                self.dlatent_avg = ppl.lerp(
+                self.dlatent_avg = self.lerp(
                     batch_dlatent_avg, self.dlatent_avg, self.dlatent_avg_beta)
 
         if return_latents:

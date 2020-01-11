@@ -369,8 +369,7 @@ class Generator(nn.Module):
         n_mlp,
         channel_multiplier=2,
         blur_kernel=[1, 3, 3, 1],
-        lr_mlp=0.01,
-        dlatent_avg_beta=0.995
+        lr_mlp=0.01
     ):
         super().__init__()
 
@@ -440,8 +439,6 @@ class Generator(nn.Module):
             in_channel = out_channel
 
         self.n_latent = self.log_size * 2 - 2
-        # self.register_buffer('dlatent_avg', torch.zeros(self.n_latent))
-        # self.dlatent_avg_beta = dlatent_avg_beta
 
     def make_noise(self):
         device = self.input.input.device
@@ -464,9 +461,6 @@ class Generator(nn.Module):
 
     def get_latent(self, input):
         return self.style(input)
-    
-    def lerp(a, b, t):
-        return a + (b - a) * t
 
     def forward(
         self,
@@ -527,13 +521,6 @@ class Generator(nn.Module):
             noise_i += 2
 
         image = skip
-
-        # Update moving average of dlatents when training
-        # if self.training and self.dlatent_avg_beta != 1:
-        #     with torch.no_grad():
-        #         batch_dlatent_avg = latent[:, 0].mean(dim=0)
-        #         self.dlatent_avg = self.lerp(
-        #             batch_dlatent_avg, self.dlatent_avg, self.dlatent_avg_beta)
 
         if return_latents:
             return image, latent

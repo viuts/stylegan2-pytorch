@@ -319,7 +319,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     }
                 )
 
-            if i % 100 == 0:
+            if i % 500 == 0:
                 with torch.no_grad():
                     g_ema.eval()
                     sample = generate_fake_images(g_ema, sample_z_chunks)
@@ -336,7 +336,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                             range=(-1, 1),
                         )
 
-            if i % 500 == 0:
+            if i % 2000 == 0:
                 ckpt_name = f'checkpoint/{str(i).zfill(8)}.pt'
                 # remove the previous checkpoint
                 shutil.rmtree('checkpoint')
